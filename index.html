@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaskForge — Personal Task Manager</title>
+<title>DoList — Personal Task Manager</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,7 +24,6 @@ body{font-family:'DM Sans',sans-serif;background:#0a0c12;color:#eef0f6;overflow-
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @keyframes scaleIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
 @keyframes slideR{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideL{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
 @keyframes progressFill{from{width:0}}
 .anim-fade{animation:fadeUp .4s ease both}
 .anim-scale{animation:scaleIn .3s ease both}
@@ -35,29 +34,35 @@ body{font-family:'DM Sans',sans-serif;background:#0a0c12;color:#eef0f6;overflow-
 .stagger>*:nth-child(4){animation-delay:.2s}
 .stagger>*:nth-child(5){animation-delay:.25s}
 .stagger>*:nth-child(6){animation-delay:.3s}
+.stagger>*:nth-child(7){animation-delay:.35s}
+.stagger>*:nth-child(8){animation-delay:.4s}
 .glass{background:rgba(26,30,44,.85);backdrop-filter:blur(12px);border:1px solid rgba(42,47,66,.6)}
-.glow-accent{box-shadow:0 0 20px rgba(232,168,56,.15)}
 .progress-bar{animation:progressFill .6s ease both}
 input,select,textarea{font-family:'DM Sans',sans-serif}
 input:focus,select:focus,textarea:focus{outline:none;border-color:#e8a838;box-shadow:0 0 0 3px rgba(232,168,56,.15)}
-.priority-urgent{color:#f87171;border-left:3px solid #f87171}
-.priority-high{color:#fb923c;border-left:3px solid #fb923c}
-.priority-medium{color:#e8a838;border-left:3px solid #e8a838}
-.priority-low{color:#34d399;border-left:3px solid #34d399}
+.priority-urgent{border-left:3px solid #f87171}
+.priority-high{border-left:3px solid #fb923c}
+.priority-medium{border-left:3px solid #e8a838}
+.priority-low{border-left:3px solid #34d399}
 .sidebar-link{transition:all .2s}
 .sidebar-link:hover,.sidebar-link.active{background:rgba(232,168,56,.1);color:#e8a838}
-@media(max-width:768px){#sidebar{transform:translateX(-100%);transition:transform .3s}#sidebar.open{transform:translateX(0)}}
+.reorder-btn{opacity:0;transition:opacity .2s,background .15s}
+.task-row:hover .reorder-btn{opacity:1}
+.inline-badge{cursor:pointer;transition:all .15s;user-select:none}
+.inline-badge:hover{filter:brightness(1.25);transform:scale(1.08)}
+.inline-badge:active{transform:scale(.95)}
+@media(max-width:768px){#sidebar{transform:translateX(-100%);transition:transform .3s}#sidebar.open{transform:translateX(0)}.reorder-btn{opacity:.6}}
 </style>
 </head>
 <body class="min-h-screen">
 
 <!-- AUTH SCREEN -->
-<div id="auth-screen" class="min-h-screen flex items-center justify-center relative overflow-hidden">
+<div id="auth-screen" class="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
 <div class="auth-blob blob1"></div>
 <div class="auth-blob blob2"></div>
-<div class="relative z-10 w-full max-w-md px-4">
+<div class="relative z-10 w-full max-w-md px-4 flex-1 flex flex-col justify-center">
   <div class="text-center mb-8 anim-fade">
-    <div class="inline-flex items-center gap-2 mb-3"><i class="fa-solid fa-hammer text-accent text-3xl"></i><span class="font-display text-3xl font-bold text-fg">TaskForge</span></div>
+    <div class="inline-flex items-center gap-2.5 mb-3"><i class="fa-solid fa-list-check text-accent text-3xl"></i><span class="font-display text-3xl font-bold text-fg tracking-tight">DoList</span></div>
     <p class="text-muted text-sm">Your personal productivity command center</p>
   </div>
   <div class="glass rounded-2xl p-6 anim-scale" id="auth-card">
@@ -68,8 +73,8 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e8a838;box-sh
     <div id="auth-form-login">
       <div class="space-y-4">
         <div><label class="block text-sm text-muted mb-1">Username</label><input id="login-user" type="text" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm" placeholder="Enter username"></div>
-        <div><label class="block text-sm text-muted mb-1">Password</label><input id="login-pass" type="password" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm" placeholder="Enter password"></div>
-        <label class="flex items-center gap-2 text-sm text-muted cursor-pointer"><input id="login-remember" type="checkbox" class="accent-amber-500 w-4 h-4 rounded">Remember me</label>
+        <div><label class="block text-sm text-muted mb-1">Password</label><input id="login-pass" type="password" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm" placeholder="Enter password" onkeydown="if(event.key==='Enter')handleLogin()"></div>
+        <label class="flex items-center gap-2 text-sm text-muted cursor-pointer select-none"><input id="login-remember" type="checkbox" class="accent-amber-500 w-4 h-4 rounded">Remember me</label>
         <button onclick="handleLogin()" class="w-full bg-accent hover:bg-accenth text-bg font-semibold py-2.5 rounded-lg transition-all text-sm">Sign In</button>
       </div>
     </div>
@@ -77,21 +82,28 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e8a838;box-sh
       <div class="space-y-4">
         <div><label class="block text-sm text-muted mb-1">Username</label><input id="reg-user" type="text" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm" placeholder="Choose username"></div>
         <div><label class="block text-sm text-muted mb-1">Password</label><input id="reg-pass" type="password" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm" placeholder="Choose password"></div>
-        <div><label class="block text-sm text-muted mb-1">Confirm Password</label><input id="reg-pass2" type="password" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm" placeholder="Confirm password"></div>
+        <div><label class="block text-sm text-muted mb-1">Confirm Password</label><input id="reg-pass2" type="password" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm" placeholder="Confirm password" onkeydown="if(event.key==='Enter')handleRegister()"></div>
         <button onclick="handleRegister()" class="w-full bg-accent hover:bg-accenth text-bg font-semibold py-2.5 rounded-lg transition-all text-sm">Create Account</button>
       </div>
     </div>
     <div id="auth-error" class="hidden mt-4 text-danger text-sm text-center bg-danger/10 rounded-lg py-2 px-3"></div>
   </div>
 </div>
+<div class="relative z-10 w-full max-w-lg px-6 pb-8 pt-6 text-center anim-fade" style="animation-delay:.3s">
+  <p class="text-muted text-xs leading-relaxed mb-3">DoList is a free, simple task manager designed for personal productivity.</p>
+  <p class="text-muted text-xs mb-3">Created by <span class="text-fg font-medium">Arsalan</span> &middot; <span class="text-fg font-medium">09351417807</span> &middot; <a href="#" onclick="event.preventDefault();showAboutModal()" class="text-accent hover:text-accenth underline underline-offset-2 transition-colors">About DoList</a></p>
+  <div class="inline-flex items-start gap-2 bg-warn/5 border border-warn/15 rounded-lg px-4 py-2.5 text-left">
+    <i class="fa-solid fa-triangle-exclamation text-warn text-xs mt-0.5 shrink-0"></i>
+    <p class="text-xs text-muted leading-relaxed"><span class="text-warn/80 font-medium">Data Notice:</span> DoList stores your data locally on this device. Your tasks and account data may be lost if your browser storage is cleared or the site data is deleted.</p>
+  </div>
+</div>
 </div>
 
 <!-- APP SCREEN -->
 <div id="app-screen" class="hidden min-h-screen flex">
-<!-- Sidebar -->
 <aside id="sidebar" class="fixed md:sticky top-0 left-0 h-screen w-64 bg-surface border-r border-bord flex flex-col z-40 shrink-0">
   <div class="p-5 border-b border-bord">
-    <div class="flex items-center gap-2"><i class="fa-solid fa-hammer text-accent text-xl"></i><span class="font-display text-xl font-bold">TaskForge</span></div>
+    <div class="flex items-center gap-2.5"><i class="fa-solid fa-list-check text-accent text-xl"></i><span class="font-display text-xl font-bold tracking-tight">DoList</span></div>
   </div>
   <nav class="flex-1 p-3 space-y-1">
     <button onclick="navigateTo('dashboard')" data-nav="dashboard" class="sidebar-link w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-muted"><i class="fa-solid fa-chart-pie w-5 text-center"></i>Dashboard</button>
@@ -103,9 +115,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:#e8a838;box-sh
     <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 text-sm text-muted hover:text-danger py-2 rounded-lg hover:bg-danger/10 transition-all"><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
   </div>
 </aside>
-<!-- Mobile overlay -->
 <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/50 z-30 md:hidden" onclick="toggleSidebar()"></div>
-<!-- Main -->
 <main class="flex-1 min-h-screen md:ml-0">
   <header class="sticky top-0 z-20 glass px-4 md:px-6 py-3 flex items-center justify-between border-b border-bord">
     <button onclick="toggleSidebar()" class="md:hidden text-muted hover:text-fg"><i class="fa-solid fa-bars text-lg"></i></button>
@@ -136,15 +146,21 @@ const isOverdue=t=>t.deadline&&t.status!=='completed'&&new Date(t.deadline)<new 
 const escHtml=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML};
 
 const PRIORITY_ORDER={urgent:4,high:3,medium:2,low:1};
+const PRIORITY_LIST=['low','medium','high','urgent'];
 const PRIORITY_LABEL={urgent:'Urgent',high:'High',medium:'Medium',low:'Low'};
 const PRIORITY_COLOR={urgent:'#f87171',high:'#fb923c',medium:'#e8a838',low:'#34d399'};
+const STATUS_LIST=['todo','in-progress','completed'];
 const STATUS_LABEL={'todo':'To Do','in-progress':'In Progress','completed':'Completed'};
 const STATUS_COLOR={'todo':'#60a5fa','in-progress':'#e8a838','completed':'#34d399'};
+
+/* Cycle helpers */
+function nextPriority(p){const i=PRIORITY_LIST.indexOf(p);return PRIORITY_LIST[(i+1)%PRIORITY_LIST.length]}
+function nextStatus(s){const i=STATUS_LIST.indexOf(s);return STATUS_LIST[(i+1)%STATUS_LIST.length]}
 
 /* ============================================================
    DATA LAYER
    ============================================================ */
-const STORAGE_KEY='taskforge_data';
+const STORAGE_KEY='dolist_data';
 
 function loadAll(){
   try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{accounts:{},currentSession:null,remembered:null}}
@@ -165,7 +181,7 @@ function saveAccount(acc){
 /* ============================================================
    STATE
    ============================================================ */
-let viewState={view:'dashboard',search:'',filterStatus:'all',filterPriority:'all',sortBy:'newest'};
+let viewState={view:'dashboard',search:'',filterStatus:'all',filterPriority:'all',sortBy:'manual'};
 
 /* ============================================================
    AUTH
@@ -188,8 +204,7 @@ function handleLogin(){
   if(d.accounts[u].password!==p)return showAuthError('Incorrect password');
   d.currentSession=u;
   if(rem)d.remembered={username:u,password:p};else d.remembered=null;
-  saveAll(d);
-  enterApp();
+  saveAll(d);enterApp();
 }
 
 function handleRegister(){
@@ -199,18 +214,8 @@ function handleRegister(){
   if(p.length<4)return showAuthError('Password must be at least 4 characters');
   if(p!==p2)return showAuthError('Passwords do not match');
   const d=loadAll();
-  const existingKeys=Object.keys(d.accounts);
-  if(existingKeys.length>0){
-    showModal(`
-      <div class="p-6">
-        <div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-full bg-danger/20 flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation text-danger"></i></div><h3 class="font-display font-semibold text-lg">Account Data Warning</h3></div>
-        <p class="text-muted text-sm mb-6">Creating a new account will permanently remove the existing account data from this device. Do you want to continue?</p>
-        <div class="flex gap-3 justify-end">
-          <button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg border border-bord text-muted hover:text-fg transition-all">Cancel</button>
-          <button onclick="confirmRegister('${escHtml(u)}','${escHtml(p)}')" class="px-4 py-2 text-sm rounded-lg bg-danger text-white hover:bg-red-600 transition-all">Delete & Continue</button>
-        </div>
-      </div>
-    `);
+  if(Object.keys(d.accounts).length>0){
+    showModal(`<div class="p-6"><div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-full bg-danger/20 flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation text-danger"></i></div><h3 class="font-display font-semibold text-lg">Account Data Warning</h3></div><p class="text-muted text-sm mb-6">Creating a new account will permanently remove the existing account data from this device. Do you want to continue?</p><div class="flex gap-3 justify-end"><button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg border border-bord text-muted hover:text-fg transition-all">Cancel</button><button onclick="confirmRegister('${escHtml(u)}','${escHtml(p)}')" class="px-4 py-2 text-sm rounded-lg bg-danger text-white hover:bg-red-600 transition-all">Delete &amp; Continue</button></div></div>`);
     return;
   }
   doRegister(u,p);
@@ -219,31 +224,21 @@ function handleRegister(){
 function confirmRegister(u,p){hideModal();doRegister(u,p)}
 
 function doRegister(u,p){
-  const d=loadAll();
-  d.accounts={}; // clear all existing
-  d.accounts[u]={password:p,tasks:[],history:[]};
-  d.currentSession=u;
-  d.remembered=null;
-  saveAll(d);
-  showToast('Account created successfully','success');
-  enterApp();
+  const d=loadAll();d.accounts={};d.accounts[u]={password:p,tasks:[],history:[]};d.currentSession=u;d.remembered=null;saveAll(d);
+  showToast('Account created successfully','success');enterApp();
 }
 
 function handleLogout(){
-  const d=loadAll();d.currentSession=null;
-  if(d.remembered)d.remembered=null; // clear remember on explicit logout
-  saveAll(d);
-  document.getElementById('app-screen').classList.add('hidden');
-  document.getElementById('auth-screen').classList.remove('hidden');
+  const d=loadAll();d.currentSession=null;d.remembered=null;saveAll(d);
+  document.getElementById('app-screen').classList.add('hidden');document.getElementById('auth-screen').classList.remove('hidden');
   document.getElementById('login-user').value='';document.getElementById('login-pass').value='';document.getElementById('login-remember').checked=false;
+  document.getElementById('auth-error').classList.add('hidden');switchAuthTab('login');
 }
 
 function enterApp(){
-  document.getElementById('auth-screen').classList.add('hidden');
-  document.getElementById('app-screen').classList.remove('hidden');
+  document.getElementById('auth-screen').classList.add('hidden');document.getElementById('app-screen').classList.remove('hidden');
   const d=loadAll(),u=d.currentSession;
-  document.getElementById('user-name').textContent=u;
-  document.getElementById('user-avatar').textContent=u[0].toUpperCase();
+  document.getElementById('user-name').textContent=u;document.getElementById('user-avatar').textContent=u[0].toUpperCase();
   navigateTo('dashboard');
 }
 
@@ -258,20 +253,17 @@ function calcProgress(task){
   return Math.round((done/task.subtasks.length)*100);
 }
 
-function addHistoryEntry(action,task,extra=''){
+function addHistoryEntry(action,task){
   const acc=getAccount();if(!acc)return;
-  acc.history.unshift({id:uid(),taskId:task.id,taskTitle:task.title,action,extra,timestamp:new Date().toISOString(),snapshot:action==='deleted'?JSON.parse(JSON.stringify(task)):null});
-  if(acc.history.length>100)acc.history=acc.history.slice(0,100);
+  acc.history.unshift({id:uid(),taskId:task.id,taskTitle:task.title,action,timestamp:new Date().toISOString(),snapshot:action==='deleted'?JSON.parse(JSON.stringify(task)):null});
+  if(acc.history.length>200)acc.history=acc.history.slice(0,200);
   saveAccount(acc);
 }
 
 function createTask(data){
   const acc=getAccount();if(!acc)return;
-  const task={id:uid(),title:data.title,description:data.description||'',priority:data.priority||'medium',status:data.status||'todo',deadline:data.deadline||null,subtasks:[],notes:[],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),deletedAt:null};
-  acc.tasks.push(task);
-  saveAccount(acc);
-  addHistoryEntry('created',task);
-  return task;
+  const task={id:uid(),title:data.title,description:data.description||'',priority:data.priority||'medium',status:data.status||'todo',deadline:data.deadline||null,subtasks:[],notes:[],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+  acc.tasks.push(task);saveAccount(acc);addHistoryEntry('created',task);return task;
 }
 
 function updateTask(id,updates){
@@ -279,93 +271,113 @@ function updateTask(id,updates){
   const t=acc.tasks.find(x=>x.id===id);if(!t)return;
   const oldStatus=t.status;
   Object.assign(t,updates,{updatedAt:new Date().toISOString()});
-  // Auto-complete if all subtasks done
-  if(t.subtasks.length>0&&t.subtasks.every(s=>s.completed)&&t.status!=='completed'){t.status='completed'}
-  // If status manually set to completed but subtasks not all done, that's fine
-  if(t.status==='completed'&&oldStatus!=='completed'){addHistoryEntry('completed',t)}
-  else{addHistoryEntry('edited',t)}
+  if(t.subtasks.length>0&&t.subtasks.every(s=>s.completed)&&t.status!=='completed')t.status='completed';
+  if(t.status==='completed'&&oldStatus!=='completed')addHistoryEntry('completed',t);
+  else addHistoryEntry('edited',t);
+  saveAccount(acc);
+}
+
+/* Inline status/priority cycling */
+function cycleTaskStatus(id){
+  const acc=getAccount();if(!acc)return;
+  const t=acc.tasks.find(x=>x.id===id);if(!t)return;
+  const newStatus=nextStatus(t.status);
+  t.status=newStatus;t.updatedAt=new Date().toISOString();
+  if(newStatus==='completed')addHistoryEntry('completed',t);
+  else addHistoryEntry('edited',t);
+  saveAccount(acc);
+}
+
+function cycleTaskPriority(id){
+  const acc=getAccount();if(!acc)return;
+  const t=acc.tasks.find(x=>x.id===id);if(!t)return;
+  t.priority=nextPriority(t.priority);t.updatedAt=new Date().toISOString();
+  addHistoryEntry('edited',t);saveAccount(acc);
+}
+
+/* Mark task done */
+function markTaskDone(id){
+  const acc=getAccount();if(!acc)return;
+  const t=acc.tasks.find(x=>x.id===id);if(!t)return;
+  if(t.status==='completed'){t.status='todo'}else{t.status='completed'}
+  t.updatedAt=new Date().toISOString();
+  if(t.status==='completed')addHistoryEntry('completed',t);
+  else addHistoryEntry('edited',t);
   saveAccount(acc);
 }
 
 function deleteTask(id){
   const acc=getAccount();if(!acc)return;
   const t=acc.tasks.find(x=>x.id===id);if(!t)return;
-  addHistoryEntry('deleted',t);
-  acc.tasks=acc.tasks.filter(x=>x.id!==id);
-  saveAccount(acc);
+  addHistoryEntry('deleted',t);acc.tasks=acc.tasks.filter(x=>x.id!==id);saveAccount(acc);
 }
 
 function restoreTask(snapshot){
   const acc=getAccount();if(!acc)return;
   snapshot.deletedAt=null;snapshot.updatedAt=new Date().toISOString();
-  acc.tasks.push(snapshot);
-  saveAccount(acc);
-  addHistoryEntry('restored',snapshot);
+  acc.tasks.push(snapshot);saveAccount(acc);addHistoryEntry('restored',snapshot);
+}
+
+function moveTask(taskId,dir){
+  const acc=getAccount();if(!acc)return;
+  const idx=acc.tasks.findIndex(x=>x.id===taskId);if(idx<0)return;
+  const newIdx=idx+dir;if(newIdx<0||newIdx>=acc.tasks.length)return;
+  [acc.tasks[idx],acc.tasks[newIdx]]=[acc.tasks[newIdx],acc.tasks[idx]];saveAccount(acc);
 }
 
 function addSubtask(taskId,title){
-  const acc=getAccount();if(!acc)return;
-  const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;
-  t.subtasks.push({id:uid(),title,completed:false,order:t.subtasks.length});
-  t.updatedAt=new Date().toISOString();
-  saveAccount(acc);
+  const acc=getAccount();if(!acc)return;const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;
+  t.subtasks.push({id:uid(),title,completed:false,order:t.subtasks.length});t.updatedAt=new Date().toISOString();saveAccount(acc);
 }
 
 function editSubtask(taskId,subId,title){
-  const acc=getAccount();if(!acc)return;
-  const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;
-  const s=t.subtasks.find(x=>x.id===subId);if(!s)return;
+  const acc=getAccount();if(!acc)return;const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;const s=t.subtasks.find(x=>x.id===subId);if(!s)return;
   s.title=title;t.updatedAt=new Date().toISOString();saveAccount(acc);
 }
 
 function toggleSubtask(taskId,subId){
-  const acc=getAccount();if(!acc)return;
-  const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;
-  const s=t.subtasks.find(x=>x.id===subId);if(!s)return;
+  const acc=getAccount();if(!acc)return;const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;const s=t.subtasks.find(x=>x.id===subId);if(!s)return;
   s.completed=!s.completed;t.updatedAt=new Date().toISOString();
-  // Auto status
   if(t.subtasks.every(x=>x.completed))t.status='completed';
   else if(t.status==='completed')t.status='in-progress';
   saveAccount(acc);
 }
 
 function deleteSubtask(taskId,subId){
-  const acc=getAccount();if(!acc)return;
-  const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;
-  t.subtasks=t.subtasks.filter(x=>x.id!==subId);
-  t.subtasks.forEach((s,i)=>s.order=i);
-  t.updatedAt=new Date().toISOString();saveAccount(acc);
+  const acc=getAccount();if(!acc)return;const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;
+  t.subtasks=t.subtasks.filter(x=>x.id!==subId);t.subtasks.forEach((s,i)=>s.order=i);t.updatedAt=new Date().toISOString();saveAccount(acc);
 }
 
 function moveSubtask(taskId,subId,dir){
-  const acc=getAccount();if(!acc)return;
-  const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;
-  const idx=t.subtasks.findIndex(x=>x.id===subId);if(idx<0)return;
-  const newIdx=idx+dir;if(newIdx<0||newIdx>=t.subtasks.length)return;
-  [t.subtasks[idx],t.subtasks[newIdx]]=[t.subtasks[newIdx],t.subtasks[idx]];
-  t.subtasks.forEach((s,i)=>s.order=i);
-  t.updatedAt=new Date().toISOString();saveAccount(acc);
+  const acc=getAccount();if(!acc)return;const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;
+  const idx=t.subtasks.findIndex(x=>x.id===subId);if(idx<0)return;const newIdx=idx+dir;if(newIdx<0||newIdx>=t.subtasks.length)return;
+  [t.subtasks[idx],t.subtasks[newIdx]]=[t.subtasks[newIdx],t.subtasks[idx]];t.subtasks.forEach((s,i)=>s.order=i);t.updatedAt=new Date().toISOString();saveAccount(acc);
 }
 
 function addNote(taskId,content){
-  const acc=getAccount();if(!acc)return;
-  const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;
-  t.notes.push({id:uid(),content,createdAt:new Date().toISOString()});
-  t.updatedAt=new Date().toISOString();saveAccount(acc);
+  const acc=getAccount();if(!acc)return;const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;
+  t.notes.push({id:uid(),content,createdAt:new Date().toISOString()});t.updatedAt=new Date().toISOString();saveAccount(acc);
 }
 
 function editNote(taskId,noteId,content){
-  const acc=getAccount();if(!acc)return;
-  const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;
-  const n=t.notes.find(x=>x.id===noteId);if(!n)return;
+  const acc=getAccount();if(!acc)return;const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;const n=t.notes.find(x=>x.id===noteId);if(!n)return;
   n.content=content;t.updatedAt=new Date().toISOString();saveAccount(acc);
 }
 
 function deleteNote(taskId,noteId){
+  const acc=getAccount();if(!acc)return;const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;
+  t.notes=t.notes.filter(x=>x.id!==noteId);t.updatedAt=new Date().toISOString();saveAccount(acc);
+}
+
+/* History management */
+function deleteHistoryEntry(histId){
   const acc=getAccount();if(!acc)return;
-  const t=acc.tasks.find(x=>x.id===taskId);if(!t)return;
-  t.notes=t.notes.filter(x=>x.id!==noteId);
-  t.updatedAt=new Date().toISOString();saveAccount(acc);
+  acc.history=acc.history.filter(h=>h.id!==histId);saveAccount(acc);renderView();
+}
+
+function clearAllHistory(){
+  const acc=getAccount();if(!acc)return;
+  acc.history=[];saveAccount(acc);renderView();showToast('History cleared','success');
 }
 
 /* ============================================================
@@ -377,25 +389,25 @@ function navigateTo(view){
   const titles={dashboard:'Dashboard',tasks:'Tasks',history:'History'};
   document.getElementById('page-title').textContent=titles[view]||view;
   renderView();
-  // close sidebar on mobile
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.add('hidden');
+  document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebar-overlay').classList.add('hidden');
 }
 
 function toggleSidebar(){
-  const s=document.getElementById('sidebar'),o=document.getElementById('sidebar-overlay');
-  s.classList.toggle('open');o.classList.toggle('hidden');
+  document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('hidden');
 }
 
 /* ============================================================
    RENDERING
    ============================================================ */
 function renderView(){
-  const mc=document.getElementById('main-content');
-  const ha=document.getElementById('header-actions');
+  const mc=document.getElementById('main-content'),ha=document.getElementById('header-actions');
   if(viewState.view==='dashboard'){ha.innerHTML='';renderDashboard(mc)}
   else if(viewState.view==='tasks'){ha.innerHTML=`<button onclick="showCreateTaskModal()" class="bg-accent hover:bg-accenth text-bg text-sm font-semibold px-4 py-2 rounded-lg transition-all flex items-center gap-2"><i class="fa-solid fa-plus"></i>New Task</button>`;renderTasks(mc)}
-  else if(viewState.view==='history'){ha.innerHTML='';renderHistory(mc)}
+  else if(viewState.view==='history'){
+    const acc=getAccount();
+    ha.innerHTML=acc&&acc.history.length?`<button onclick="confirmClearHistory()" class="text-sm text-muted hover:text-danger px-3 py-2 rounded-lg hover:bg-danger/10 transition-all flex items-center gap-2"><i class="fa-solid fa-trash"></i>Clear All</button>`:'';
+    renderHistory(mc);
+  }
 }
 
 /* ---------- DASHBOARD ---------- */
@@ -408,39 +420,29 @@ function renderDashboard(el){
   const byS={'todo':tasks.filter(t=>t.status==='todo').length,'in-progress':inProgress,'completed':completed};
   const recent=tasks.slice().sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt)).slice(0,5);
 
-  el.innerHTML=`
-  <div class="space-y-6">
-    <!-- Stats -->
+  el.innerHTML=`<div class="space-y-6">
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger">
       ${statCard('fa-list-check','Total Tasks',total,'text-info','bg-info/10')}
       ${statCard('fa-circle-check','Completed',completed,'text-success','bg-success/10')}
       ${statCard('fa-spinner','In Progress',inProgress,'text-accent','bg-accent/10')}
       ${statCard('fa-clock','Overdue',overdue,'text-danger','bg-danger/10')}
     </div>
-    <!-- Rate + Priority -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div class="bg-card rounded-xl border border-bord p-5 anim-fade">
         <h3 class="font-display font-semibold text-sm mb-4">Completion Rate</h3>
-        <div class="flex items-end gap-4">
-          <span class="font-display text-5xl font-bold text-accent">${rate}</span><span class="text-muted text-lg mb-1">%</span>
-        </div>
+        <div class="flex items-end gap-4"><span class="font-display text-5xl font-bold text-accent">${rate}</span><span class="text-muted text-lg mb-1">%</span></div>
         <div class="mt-4 h-3 bg-surface rounded-full overflow-hidden"><div class="h-full rounded-full progress-bar" style="width:${rate}%;background:linear-gradient(90deg,#e8a838,#34d399)"></div></div>
         <p class="text-muted text-xs mt-2">${completed} of ${total} tasks completed</p>
       </div>
       <div class="bg-card rounded-xl border border-bord p-5 anim-fade">
         <h3 class="font-display font-semibold text-sm mb-4">By Priority</h3>
-        <div class="space-y-3">
-          ${['urgent','high','medium','low'].map(p=>`<div class="flex items-center gap-3"><span class="text-xs w-14 font-medium" style="color:${PRIORITY_COLOR[p]}">${PRIORITY_LABEL[p]}</span><div class="flex-1 h-2 bg-surface rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:${total?(byP[p]/total)*100:0}%;background:${PRIORITY_COLOR[p]}"></div></div><span class="text-xs text-muted w-6 text-right">${byP[p]}</span></div>`).join('')}
-        </div>
+        <div class="space-y-3">${['urgent','high','medium','low'].map(p=>`<div class="flex items-center gap-3"><span class="text-xs w-14 font-medium" style="color:${PRIORITY_COLOR[p]}">${PRIORITY_LABEL[p]}</span><div class="flex-1 h-2 bg-surface rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:${total?(byP[p]/total)*100:0}%;background:${PRIORITY_COLOR[p]}"></div></div><span class="text-xs text-muted w-6 text-right">${byP[p]}</span></div>`).join('')}</div>
       </div>
     </div>
-    <!-- Status breakdown + Recent -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div class="bg-card rounded-xl border border-bord p-5 anim-fade">
         <h3 class="font-display font-semibold text-sm mb-4">By Status</h3>
-        <div class="space-y-3">
-          ${['todo','in-progress','completed'].map(s=>`<div class="flex items-center gap-3"><span class="text-xs w-20 font-medium" style="color:${STATUS_COLOR[s]}">${STATUS_LABEL[s]}</span><div class="flex-1 h-2 bg-surface rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:${total?(byS[s]/total)*100:0}%;background:${STATUS_COLOR[s]}"></div></div><span class="text-xs text-muted w-6 text-right">${byS[s]}</span></div>`).join('')}
-        </div>
+        <div class="space-y-3">${['todo','in-progress','completed'].map(s=>`<div class="flex items-center gap-3"><span class="text-xs w-20 font-medium" style="color:${STATUS_COLOR[s]}">${STATUS_LABEL[s]}</span><div class="flex-1 h-2 bg-surface rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:${total?(byS[s]/total)*100:0}%;background:${STATUS_COLOR[s]}"></div></div><span class="text-xs text-muted w-6 text-right">${byS[s]}</span></div>`).join('')}</div>
       </div>
       <div class="bg-card rounded-xl border border-bord p-5 anim-fade">
         <h3 class="font-display font-semibold text-sm mb-4">Recent Activity</h3>
@@ -458,16 +460,14 @@ function statCard(icon,label,val,color,bg){
 function renderTasks(el){
   const acc=getAccount();if(!acc)return;
   let tasks=acc.tasks.slice();
+  const isManualSort=viewState.sortBy==='manual';
 
-  // Search
   if(viewState.search){const q=viewState.search.toLowerCase();tasks=tasks.filter(t=>t.title.toLowerCase().includes(q)||t.description.toLowerCase().includes(q))}
-
-  // Filter
   if(viewState.filterStatus!=='all')tasks=tasks.filter(t=>t.status===viewState.filterStatus);
   if(viewState.filterPriority!=='all')tasks=tasks.filter(t=>t.priority===viewState.filterPriority);
 
-  // Sort
   switch(viewState.sortBy){
+    case'manual':break;
     case'newest':tasks.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));break;
     case'oldest':tasks.sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));break;
     case'deadline':tasks.sort((a,b)=>{if(!a.deadline)return 1;if(!b.deadline)return-1;return new Date(a.deadline)-new Date(b.deadline)});break;
@@ -476,52 +476,60 @@ function renderTasks(el){
     case'progress':tasks.sort((a,b)=>calcProgress(b)-calcProgress(a));break;
   }
 
+  const fullTasks=acc.tasks;
+  const fullIdx=id=>fullTasks.findIndex(x=>x.id===id);
   const statusOpts=['all','todo','in-progress','completed'];
   const prioOpts=['all','urgent','high','medium','low'];
-  const sortOpts=[['newest','Newest'],['oldest','Oldest'],['deadline','Deadline'],['priority','Priority'],['status','Status'],['progress','Progress']];
+  const sortOpts=[['manual','Manual'],['newest','Newest'],['oldest','Oldest'],['deadline','Deadline'],['priority','Priority'],['status','Status'],['progress','Progress']];
 
-  el.innerHTML=`
-  <div class="space-y-4">
-    <!-- Controls -->
+  el.innerHTML=`<div class="space-y-4">
     <div class="flex flex-wrap gap-3 items-center anim-fade">
       <div class="relative flex-1 min-w-[200px]"><i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm"></i><input id="task-search" type="text" placeholder="Search tasks..." value="${escHtml(viewState.search)}" oninput="viewState.search=this.value;renderView()" class="w-full bg-card border border-bord rounded-lg pl-9 pr-4 py-2 text-sm text-fg"></div>
-      <select onchange="viewState.filterStatus=this.value;renderView()" class="bg-card border border-bord rounded-lg px-3 py-2 text-sm text-fg">
-        ${statusOpts.map(s=>`<option value="${s}" ${viewState.filterStatus===s?'selected':''}>${s==='all'?'All Status':STATUS_LABEL[s]||s}</option>`).join('')}
-      </select>
-      <select onchange="viewState.filterPriority=this.value;renderView()" class="bg-card border border-bord rounded-lg px-3 py-2 text-sm text-fg">
-        ${prioOpts.map(p=>`<option value="${p}" ${viewState.filterPriority===p?'selected':''}>${p==='all'?'All Priority':PRIORITY_LABEL[p]||p}</option>`).join('')}
-      </select>
-      <select onchange="viewState.sortBy=this.value;renderView()" class="bg-card border border-bord rounded-lg px-3 py-2 text-sm text-fg">
-        ${sortOpts.map(([v,l])=>`<option value="${v}" ${viewState.sortBy===v?'selected':''}>${l}</option>`).join('')}
-      </select>
+      <select onchange="viewState.filterStatus=this.value;renderView()" class="bg-card border border-bord rounded-lg px-3 py-2 text-sm text-fg">${statusOpts.map(s=>`<option value="${s}" ${viewState.filterStatus===s?'selected':''}>${s==='all'?'All Status':STATUS_LABEL[s]||s}</option>`).join('')}</select>
+      <select onchange="viewState.filterPriority=this.value;renderView()" class="bg-card border border-bord rounded-lg px-3 py-2 text-sm text-fg">${prioOpts.map(p=>`<option value="${p}" ${viewState.filterPriority===p?'selected':''}>${p==='all'?'All Priority':PRIORITY_LABEL[p]||p}</option>`).join('')}</select>
+      <select onchange="viewState.sortBy=this.value;renderView()" class="bg-card border border-bord rounded-lg px-3 py-2 text-sm text-fg">${sortOpts.map(([v,l])=>`<option value="${v}" ${viewState.sortBy===v?'selected':''}>${l}</option>`).join('')}</select>
     </div>
-    <!-- Task List -->
-    ${tasks.length?`<div class="space-y-3 stagger">${tasks.map(t=>taskCard(t)).join('')}</div>`:`<div class="text-center py-16"><i class="fa-solid fa-inbox text-4xl text-muted/30 mb-4"></i><p class="text-muted">No tasks found</p></div>`}
+    ${isManualSort?'<p class="text-xs text-muted flex items-center gap-1.5 anim-fade"><i class="fa-solid fa-grip-vertical"></i>Manual order — use arrows to reorder tasks</p>':''}
+    ${tasks.length?`<div class="space-y-3 stagger">${tasks.map((t,i)=>taskCard(t,i,tasks.length,fullIdx(t.id),fullTasks.length,isManualSort)).join('')}</div>`:`<div class="text-center py-16"><i class="fa-solid fa-inbox text-4xl text-muted/30 mb-4 block"></i><p class="text-muted">No tasks found</p></div>`}
   </div>`;
 }
 
-function taskCard(t){
+function taskCard(t,displayIdx,displayTotal,fullIndex,fullTotal,isManual){
   const prog=calcProgress(t);
   const od=isOverdue(t);
-  return`<div onclick="showTaskDetail('${t.id}')" class="bg-card rounded-xl border border-bord p-4 cursor-pointer hover:border-accent/40 hover:bg-cardh transition-all group anim-fade priority-${t.priority}">
-    <div class="flex items-start justify-between gap-3 mb-2">
-      <div class="flex-1 min-w-0">
-        <h3 class="font-semibold text-sm truncate group-hover:text-accent transition-colors">${escHtml(t.title)}</h3>
-        ${t.description?`<p class="text-muted text-xs mt-0.5 truncate">${escHtml(t.description)}</p>`:''}
+  const canUp=fullIndex>0;
+  const canDown=fullIndex<fullTotal-1&&fullIndex>=0;
+  const isDone=t.status==='completed';
+
+  return`<div class="task-row bg-card rounded-xl border border-bord p-4 hover:border-accent/40 hover:bg-cardh transition-all group anim-fade priority-${t.priority} flex items-center gap-3" onclick="showTaskDetail('${t.id}')">
+    <!-- Done button -->
+    <button onclick="event.stopPropagation();markTaskDone('${t.id}');renderView()" class="shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all ${isDone?'border-success bg-success/20':'border-bord hover:border-success hover:bg-success/10'}" title="${isDone?'Mark as To Do':'Mark as Done'}">
+      ${isDone?'<i class="fa-solid fa-check text-success text-[10px]"></i>':''}
+    </button>
+    ${isManual?`<div class="flex flex-col gap-0.5 shrink-0" onclick="event.stopPropagation()">
+      <button onclick="event.stopPropagation();moveTask('${t.id}',-1);renderView()" class="reorder-btn w-6 h-6 rounded flex items-center justify-center text-muted hover:text-accent hover:bg-accent/10 text-[10px] transition-all ${canUp?'':'opacity-20 pointer-events-none'}" title="Move up"><i class="fa-solid fa-chevron-up"></i></button>
+      <button onclick="event.stopPropagation();moveTask('${t.id}',1);renderView()" class="reorder-btn w-6 h-6 rounded flex items-center justify-center text-muted hover:text-accent hover:bg-accent/10 text-[10px] transition-all ${canDown?'':'opacity-20 pointer-events-none'}" title="Move down"><i class="fa-solid fa-chevron-down"></i></button>
+    </div>`:''}
+    <div class="flex-1 min-w-0">
+      <div class="flex items-start justify-between gap-3 mb-2">
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-sm truncate group-hover:text-accent transition-colors ${isDone?'line-through text-muted':''}">${escHtml(t.title)}</h3>
+          ${t.description?`<p class="text-muted text-xs mt-0.5 truncate">${escHtml(t.description)}</p>`:''}
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span onclick="event.stopPropagation();cycleTaskPriority('${t.id}');renderView()" class="inline-badge text-[11px] px-2 py-0.5 rounded-full font-medium" style="background:${PRIORITY_COLOR[t.priority]}20;color:${PRIORITY_COLOR[t.priority]}" title="Click to change priority">${PRIORITY_LABEL[t.priority]}</span>
+          <span onclick="event.stopPropagation();cycleTaskStatus('${t.id}');renderView()" class="inline-badge text-[11px] px-2 py-0.5 rounded-full font-medium" style="background:${STATUS_COLOR[t.status]}20;color:${STATUS_COLOR[t.status]}" title="Click to change status">${STATUS_LABEL[t.status]}</span>
+        </div>
       </div>
-      <div class="flex items-center gap-2 shrink-0">
-        <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:${PRIORITY_COLOR[t.priority]}20;color:${PRIORITY_COLOR[t.priority]}">${PRIORITY_LABEL[t.priority]}</span>
-        <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:${STATUS_COLOR[t.status]}20;color:${STATUS_COLOR[t.status]}">${STATUS_LABEL[t.status]}</span>
+      <div class="flex items-center gap-4 mt-3">
+        <div class="flex-1 h-1.5 bg-surface rounded-full overflow-hidden"><div class="h-full rounded-full progress-bar" style="width:${prog}%;background:linear-gradient(90deg,${STATUS_COLOR[t.status]},${PRIORITY_COLOR[t.priority]})"></div></div>
+        <span class="text-xs text-muted shrink-0">${prog}%</span>
       </div>
-    </div>
-    <div class="flex items-center gap-4 mt-3">
-      <div class="flex-1 h-1.5 bg-surface rounded-full overflow-hidden"><div class="h-full rounded-full progress-bar" style="width:${prog}%;background:linear-gradient(90deg,${STATUS_COLOR[t.status]},${PRIORITY_COLOR[t.priority]})"></div></div>
-      <span class="text-xs text-muted shrink-0">${prog}%</span>
-    </div>
-    <div class="flex items-center gap-4 mt-2 text-xs text-muted">
-      ${t.deadline?`<span class="${od?'text-danger':''}"><i class="fa-regular fa-calendar mr-1"></i>${fmtDate(t.deadline)}${od?' (overdue)':''}</span>`:''}
-      ${t.subtasks.length?`<span><i class="fa-solid fa-list-ul mr-1"></i>${t.subtasks.filter(s=>s.completed).length}/${t.subtasks.length}</span>`:''}
-      ${t.notes.length?`<span><i class="fa-solid fa-note-sticky mr-1"></i>${t.notes.length}</span>`:''}
+      <div class="flex items-center gap-4 mt-2 text-xs text-muted">
+        ${t.deadline?`<span class="${od?'text-danger':''}"><i class="fa-regular fa-calendar mr-1"></i>${fmtDate(t.deadline)}${od?' (overdue)':''}</span>`:''}
+        ${t.subtasks.length?`<span><i class="fa-solid fa-list-ul mr-1"></i>${t.subtasks.filter(s=>s.completed).length}/${t.subtasks.length}</span>`:''}
+        ${t.notes.length?`<span><i class="fa-solid fa-note-sticky mr-1"></i>${t.notes.length}</span>`:''}
+      </div>
     </div>
   </div>`;
 }
@@ -533,265 +541,148 @@ function renderHistory(el){
   const actionIcon={created:'fa-plus text-success',edited:'fa-pen text-accent',deleted:'fa-trash text-danger',completed:'fa-circle-check text-success',restored:'fa-rotate-left text-info'};
   const actionLabel={created:'Created',edited:'Edited',deleted:'Deleted',completed:'Completed',restored:'Restored'};
 
-  el.innerHTML=`
-  <div class="space-y-3">
-    ${hist.length?hist.map(h=>`<div class="bg-card rounded-xl border border-bord p-4 flex items-center gap-4 anim-fade">
+  el.innerHTML=`<div class="space-y-3">
+    ${hist.length?hist.map(h=>`<div class="bg-card rounded-xl border border-bord p-4 flex items-center gap-4 anim-fade group">
       <div class="w-9 h-9 rounded-lg bg-surface flex items-center justify-center shrink-0"><i class="fa-solid ${actionIcon[h.action]||'fa-circle text-muted'}"></i></div>
       <div class="flex-1 min-w-0">
         <p class="text-sm font-medium truncate">${escHtml(h.taskTitle)}</p>
         <p class="text-xs text-muted">${actionLabel[h.action]||h.action} &middot; ${fmtDate(h.timestamp)} ${fmtTime(h.timestamp)}</p>
       </div>
       ${h.action==='deleted'&&h.snapshot?`<button onclick="event.stopPropagation();doRestore('${h.id}')" class="text-xs px-3 py-1.5 rounded-lg bg-info/10 text-info hover:bg-info/20 transition-all shrink-0"><i class="fa-solid fa-rotate-left mr-1"></i>Restore</button>`:''}
-    </div>`).join(''):`<div class="text-center py-16"><i class="fa-solid fa-clock-rotate-left text-4xl text-muted/30 mb-4"></i><p class="text-muted">No history yet</p></div>`}
+      <button onclick="event.stopPropagation();deleteHistoryEntry('${h.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-muted hover:text-danger hover:bg-danger/10 transition-all shrink-0 opacity-0 group-hover:opacity-100" title="Remove entry"><i class="fa-solid fa-xmark text-xs"></i></button>
+    </div>`).join(''):`<div class="text-center py-16"><i class="fa-solid fa-clock-rotate-left text-4xl text-muted/30 mb-4 block"></i><p class="text-muted">No history yet</p></div>`}
   </div>`;
 }
 
 function doRestore(histId){
   const acc=getAccount();if(!acc)return;
-  const entry=acc.history.find(h=>h.id===histId);
-  if(!entry||!entry.snapshot)return;
-  restoreTask(entry.snapshot);
-  acc.history=acc.history.filter(h=>h.id!==histId);
-  saveAccount(acc);
-  showToast('Task restored','success');
-  renderView();
+  const entry=acc.history.find(h=>h.id===histId);if(!entry||!entry.snapshot)return;
+  restoreTask(entry.snapshot);acc.history=acc.history.filter(h=>h.id!==histId);saveAccount(acc);
+  showToast('Task restored','success');renderView();
+}
+
+function confirmClearHistory(){
+  showModal(`<div class="p-6"><div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-full bg-danger/20 flex items-center justify-center"><i class="fa-solid fa-trash text-danger"></i></div><h3 class="font-display font-semibold text-lg">Clear All History</h3></div><p class="text-muted text-sm mb-6">This will permanently remove all history entries. Deleted task snapshots will no longer be restorable. Continue?</p><div class="flex gap-3 justify-end"><button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg border border-bord text-muted hover:text-fg transition-all">Cancel</button><button onclick="hideModal();clearAllHistory()" class="px-4 py-2 text-sm rounded-lg bg-danger text-white hover:bg-red-600 transition-all">Clear All</button></div></div>`);
 }
 
 /* ============================================================
    MODALS
    ============================================================ */
-function showModal(html){
-  document.getElementById('modal-body').innerHTML=html;
-  document.getElementById('modal-overlay').classList.remove('hidden');
-}
+function showModal(html){document.getElementById('modal-body').innerHTML=html;document.getElementById('modal-overlay').classList.remove('hidden')}
 function hideModal(){document.getElementById('modal-overlay').classList.add('hidden')}
 
-/* Create Task */
+function showAboutModal(){
+  showModal(`<div class="p-6 max-w-lg"><div class="flex items-center gap-2.5 mb-4"><i class="fa-solid fa-list-check text-accent text-2xl"></i><span class="font-display text-2xl font-bold tracking-tight">DoList</span></div><p class="text-sm text-muted leading-relaxed mb-4">DoList is a free, simple task manager designed for personal productivity. It helps you organize your work with tasks, subtasks, notes, priorities, deadlines, and more — all stored locally on your device with no external servers.</p><div class="space-y-2 text-sm text-muted mb-5"><div class="flex items-center gap-2"><i class="fa-solid fa-check text-success w-5 text-center"></i>Task priorities, statuses, and deadlines</div><div class="flex items-center gap-2"><i class="fa-solid fa-check text-success w-5 text-center"></i>Inline status &amp; priority cycling</div><div class="flex items-center gap-2"><i class="fa-solid fa-check text-success w-5 text-center"></i>One-click mark as done</div><div class="flex items-center gap-2"><i class="fa-solid fa-check text-success w-5 text-center"></i>Subtasks with reordering and auto-progress</div><div class="flex items-center gap-2"><i class="fa-solid fa-check text-success w-5 text-center"></i>Notes attached to any task</div><div class="flex items-center gap-2"><i class="fa-solid fa-check text-success w-5 text-center"></i>History tracking with task restore</div><div class="flex items-center gap-2"><i class="fa-solid fa-check text-success w-5 text-center"></i>Search, filter, sort, and manual reorder</div><div class="flex items-center gap-2"><i class="fa-solid fa-check text-success w-5 text-center"></i>Dashboard with live statistics</div></div><p class="text-xs text-muted">Created by <span class="text-fg font-medium">Arsalan</span> &middot; 09351417807</p><div class="flex justify-end mt-5"><button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg bg-accent text-bg hover:bg-accenth font-semibold transition-all">Close</button></div></div>`);
+}
+
 function showCreateTaskModal(){
-  showModal(`
-  <div class="p-6">
-    <h3 class="font-display font-semibold text-lg mb-5">Create New Task</h3>
-    <div class="space-y-4">
-      <div><label class="block text-sm text-muted mb-1">Title</label><input id="ct-title" type="text" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm" placeholder="Task title"></div>
-      <div><label class="block text-sm text-muted mb-1">Description</label><textarea id="ct-desc" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm resize-none" rows="3" placeholder="Optional description"></textarea></div>
-      <div class="grid grid-cols-2 gap-4">
-        <div><label class="block text-sm text-muted mb-1">Priority</label><select id="ct-priority" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
-        <div><label class="block text-sm text-muted mb-1">Status</label><select id="ct-status" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"><option value="todo">To Do</option><option value="in-progress">In Progress</option><option value="completed">Completed</option></select></div>
-      </div>
-      <div><label class="block text-sm text-muted mb-1">Deadline</label><input id="ct-deadline" type="date" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"></div>
-      <div class="flex gap-3 justify-end pt-2">
-        <button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg border border-bord text-muted hover:text-fg transition-all">Cancel</button>
-        <button onclick="submitCreateTask()" class="px-4 py-2 text-sm rounded-lg bg-accent text-bg hover:bg-accenth font-semibold transition-all">Create</button>
-      </div>
-    </div>
-  </div>`);
+  showModal(`<div class="p-6"><h3 class="font-display font-semibold text-lg mb-5">Create New Task</h3><div class="space-y-4"><div><label class="block text-sm text-muted mb-1">Title</label><input id="ct-title" type="text" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm" placeholder="Task title"></div><div><label class="block text-sm text-muted mb-1">Description</label><textarea id="ct-desc" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm resize-none" rows="3" placeholder="Optional description"></textarea></div><div class="grid grid-cols-2 gap-4"><div><label class="block text-sm text-muted mb-1">Priority</label><select id="ct-priority" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select></div><div><label class="block text-sm text-muted mb-1">Status</label><select id="ct-status" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"><option value="todo">To Do</option><option value="in-progress">In Progress</option><option value="completed">Completed</option></select></div></div><div><label class="block text-sm text-muted mb-1">Deadline</label><input id="ct-deadline" type="date" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"></div><div class="flex gap-3 justify-end pt-2"><button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg border border-bord text-muted hover:text-fg transition-all">Cancel</button><button onclick="submitCreateTask()" class="px-4 py-2 text-sm rounded-lg bg-accent text-bg hover:bg-accenth font-semibold transition-all">Create</button></div></div></div>`);
   setTimeout(()=>document.getElementById('ct-title')?.focus(),100);
 }
 
 function submitCreateTask(){
-  const title=document.getElementById('ct-title').value.trim();
-  if(!title)return showToast('Title is required','error');
+  const title=document.getElementById('ct-title').value.trim();if(!title)return showToast('Title is required','error');
   createTask({title,description:document.getElementById('ct-desc').value.trim(),priority:document.getElementById('ct-priority').value,status:document.getElementById('ct-status').value,deadline:document.getElementById('ct-deadline').value||null});
   hideModal();showToast('Task created','success');renderView();
 }
 
 /* Task Detail */
 function showTaskDetail(id){
-  const acc=getAccount();if(!acc)return;
-  const t=acc.tasks.find(x=>x.id===id);if(!t)return;
+  const acc=getAccount();if(!acc)return;const t=acc.tasks.find(x=>x.id===id);if(!t)return;
   renderTaskDetail(t);
 }
 
 function renderTaskDetail(t){
-  const prog=calcProgress(t);
-  const od=isOverdue(t);
+  const prog=calcProgress(t);const od=isOverdue(t);const isDone=t.status==='completed';
 
-  showModal(`
-  <div class="p-6 max-w-2xl" id="task-detail-root">
-    <!-- Header -->
+  showModal(`<div class="p-6" id="task-detail-root">
     <div class="flex items-start justify-between gap-3 mb-5">
       <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2 mb-1">
-          <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:${PRIORITY_COLOR[t.priority]}20;color:${PRIORITY_COLOR[t.priority]}">${PRIORITY_LABEL[t.priority]}</span>
-          <span class="text-xs px-2 py-0.5 rounded-full font-medium" style="background:${STATUS_COLOR[t.status]}20;color:${STATUS_COLOR[t.status]}">${STATUS_LABEL[t.status]}</span>
-          ${od?'<span class="text-xs px-2 py-0.5 rounded-full font-medium bg-danger/20 text-danger">Overdue</span>':''}
+        <div class="flex items-center gap-2 mb-2 flex-wrap">
+          <!-- Clickable priority badge -->
+          <span onclick="cycleTaskPriority('${t.id}');refreshDetail('${t.id}')" class="inline-badge text-xs px-2.5 py-1 rounded-full font-medium cursor-pointer" style="background:${PRIORITY_COLOR[t.priority]}20;color:${PRIORITY_COLOR[t.priority]}" title="Click to change priority"><i class="fa-solid fa-flag mr-1 text-[10px]"></i>${PRIORITY_LABEL[t.priority]}</span>
+          <!-- Clickable status badge -->
+          <span onclick="cycleTaskStatus('${t.id}');refreshDetail('${t.id}')" class="inline-badge text-xs px-2.5 py-1 rounded-full font-medium cursor-pointer" style="background:${STATUS_COLOR[t.status]}20;color:${STATUS_COLOR[t.status]}" title="Click to change status"><i class="fa-solid fa-circle text-[8px] mr-1"></i>${STATUS_LABEL[t.status]}</span>
+          ${od?'<span class="text-xs px-2.5 py-1 rounded-full font-medium bg-danger/20 text-danger"><i class="fa-solid fa-clock text-[10px] mr-1"></i>Overdue</span>':''}
         </div>
-        <h2 class="font-display font-bold text-xl">${escHtml(t.title)}</h2>
+        <h2 class="font-display font-bold text-xl ${isDone?'line-through text-muted':''}">${escHtml(t.title)}</h2>
         ${t.description?`<p class="text-muted text-sm mt-1">${escHtml(t.description)}</p>`:''}
       </div>
       <div class="flex items-center gap-2 shrink-0">
+        <button onclick="markTaskDone('${t.id}');refreshDetail('${t.id}')" class="h-8 px-3 rounded-lg flex items-center gap-1.5 text-sm font-medium transition-all ${isDone?'bg-surface text-muted hover:bg-success/10 hover:text-success':'bg-success/15 text-success hover:bg-success/25'}" title="${isDone?'Reopen task':'Mark as done'}"><i class="fa-solid ${isDone?'fa-rotate-left':'fa-check'}"></i><span class="hidden sm:inline">${isDone?'Reopen':'Done'}</span></button>
         <button onclick="showEditTaskModal('${t.id}')" class="w-8 h-8 rounded-lg bg-surface hover:bg-cardh flex items-center justify-center text-muted hover:text-accent transition-all" title="Edit"><i class="fa-solid fa-pen text-xs"></i></button>
         <button onclick="confirmDeleteTask('${t.id}')" class="w-8 h-8 rounded-lg bg-surface hover:bg-danger/20 flex items-center justify-center text-muted hover:text-danger transition-all" title="Delete"><i class="fa-solid fa-trash text-xs"></i></button>
         <button onclick="hideModal()" class="w-8 h-8 rounded-lg bg-surface hover:bg-cardh flex items-center justify-center text-muted hover:text-fg transition-all"><i class="fa-solid fa-xmark"></i></button>
       </div>
     </div>
-
-    <!-- Meta -->
     <div class="flex flex-wrap gap-4 mb-5 text-sm">
       <div class="flex items-center gap-2 text-muted"><i class="fa-regular fa-calendar"></i><span>${t.deadline?fmtDate(t.deadline):'No deadline'}</span></div>
       <div class="flex items-center gap-2 text-muted"><i class="fa-regular fa-clock"></i><span>Created ${fmtRelative(t.createdAt)}</span></div>
     </div>
-
-    <!-- Progress -->
     <div class="mb-6">
       <div class="flex items-center justify-between mb-2"><span class="text-sm font-medium">Progress</span><span class="text-sm text-accent font-semibold">${prog}%</span></div>
       <div class="h-2.5 bg-surface rounded-full overflow-hidden"><div class="h-full rounded-full progress-bar" style="width:${prog}%;background:linear-gradient(90deg,${STATUS_COLOR[t.status]},${PRIORITY_COLOR[t.priority]})"></div></div>
     </div>
-
     <!-- Subtasks -->
     <div class="mb-6">
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="font-display font-semibold text-sm flex items-center gap-2"><i class="fa-solid fa-list-ul text-muted"></i>Subtasks <span class="text-muted font-normal">(${t.subtasks.filter(s=>s.completed).length}/${t.subtasks.length})</span></h3>
+      <h3 class="font-display font-semibold text-sm flex items-center gap-2 mb-3"><i class="fa-solid fa-list-ul text-muted"></i>Subtasks <span class="text-muted font-normal">(${t.subtasks.filter(s=>s.completed).length}/${t.subtasks.length})</span></h3>
+      <div class="space-y-2 mb-3">
+        ${t.subtasks.length?t.subtasks.map((s,i)=>`<div class="flex items-center gap-2 group bg-surface/50 rounded-lg px-3 py-2"><button onclick="toggleSubtask('${t.id}','${s.id}');refreshDetail('${t.id}')" class="shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${s.completed?'border-success bg-success/20':'border-bord hover:border-accent'}">${s.completed?'<i class="fa-solid fa-check text-success text-[10px]"></i>':''}</button><span class="flex-1 text-sm ${s.completed?'line-through text-muted':'text-fg'} truncate">${escHtml(s.title)}</span><div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity"><button onclick="moveSubtask('${t.id}','${s.id}',-1);refreshDetail('${t.id}')" class="w-6 h-6 rounded flex items-center justify-center text-muted hover:text-accent text-xs" ${i===0?'disabled style="opacity:.3"':''}><i class="fa-solid fa-chevron-up"></i></button><button onclick="moveSubtask('${t.id}','${s.id}',1);refreshDetail('${t.id}')" class="w-6 h-6 rounded flex items-center justify-center text-muted hover:text-accent text-xs" ${i===t.subtasks.length-1?'disabled style="opacity:.3"':''}><i class="fa-solid fa-chevron-down"></i></button><button onclick="showEditSubtaskModal('${t.id}','${s.id}','${escHtml(s.title)}')" class="w-6 h-6 rounded flex items-center justify-center text-muted hover:text-accent text-xs"><i class="fa-solid fa-pen"></i></button><button onclick="deleteSubtask('${t.id}','${s.id}');refreshDetail('${t.id}')" class="w-6 h-6 rounded flex items-center justify-center text-muted hover:text-danger text-xs"><i class="fa-solid fa-xmark"></i></button></div></div>`).join(''):'<p class="text-muted text-sm text-center py-3">No subtasks yet</p>'}
       </div>
-      <div class="space-y-2 mb-3" id="subtask-list">
-        ${t.subtasks.length?t.subtasks.map((s,i)=>`
-        <div class="flex items-center gap-2 group bg-surface/50 rounded-lg px-3 py-2">
-          <button onclick="toggleSubtask('${t.id}','${s.id}');refreshDetail('${t.id}')" class="shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${s.completed?'border-success bg-success/20':'border-bord hover:border-accent'}">
-            ${s.completed?'<i class="fa-solid fa-check text-success text-[10px]"></i>':''}
-          </button>
-          <span class="flex-1 text-sm ${s.completed?'line-through text-muted':'text-fg'} truncate">${escHtml(s.title)}</span>
-          <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onclick="moveSubtask('${t.id}','${s.id}',-1);refreshDetail('${t.id}')" class="w-6 h-6 rounded flex items-center justify-center text-muted hover:text-accent text-xs" ${i===0?'disabled style="opacity:.3"':''}><i class="fa-solid fa-chevron-up"></i></button>
-            <button onclick="moveSubtask('${t.id}','${s.id}',1);refreshDetail('${t.id}')" class="w-6 h-6 rounded flex items-center justify-center text-muted hover:text-accent text-xs" ${i===t.subtasks.length-1?'disabled style="opacity:.3"':''}><i class="fa-solid fa-chevron-down"></i></button>
-            <button onclick="showEditSubtaskModal('${t.id}','${s.id}','${escHtml(s.title)}')" class="w-6 h-6 rounded flex items-center justify-center text-muted hover:text-accent text-xs"><i class="fa-solid fa-pen"></i></button>
-            <button onclick="deleteSubtask('${t.id}','${s.id}');refreshDetail('${t.id}')" class="w-6 h-6 rounded flex items-center justify-center text-muted hover:text-danger text-xs"><i class="fa-solid fa-xmark"></i></button>
-          </div>
-        </div>`).join(''):'<p class="text-muted text-sm text-center py-3">No subtasks</p>'}
-      </div>
-      <div class="flex gap-2">
-        <input id="new-subtask-input" type="text" placeholder="Add subtask..." class="flex-1 bg-surface border border-bord rounded-lg px-3 py-2 text-sm text-fg" onkeydown="if(event.key==='Enter')addSubtaskFromInput('${t.id}')">
-        <button onclick="addSubtaskFromInput('${t.id}')" class="px-3 py-2 bg-accent/10 text-accent rounded-lg text-sm hover:bg-accent/20 transition-all"><i class="fa-solid fa-plus"></i></button>
-      </div>
+      <div class="flex gap-2"><input id="new-subtask-input" type="text" placeholder="Add subtask..." class="flex-1 bg-surface border border-bord rounded-lg px-3 py-2 text-sm text-fg" onkeydown="if(event.key==='Enter')addSubtaskFromInput('${t.id}')"><button onclick="addSubtaskFromInput('${t.id}')" class="px-3 py-2 bg-accent/10 text-accent rounded-lg text-sm hover:bg-accent/20 transition-all"><i class="fa-solid fa-plus"></i></button></div>
     </div>
-
     <!-- Notes -->
     <div>
       <h3 class="font-display font-semibold text-sm flex items-center gap-2 mb-3"><i class="fa-solid fa-note-sticky text-muted"></i>Notes <span class="text-muted font-normal">(${t.notes.length})</span></h3>
       <div class="space-y-2 mb-3">
-        ${t.notes.length?t.notes.map(n=>`
-        <div class="bg-surface/50 rounded-lg px-3 py-2.5 group">
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm flex-1 whitespace-pre-wrap">${escHtml(n.content)}</p>
-            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-              <button onclick="showEditNoteModal('${t.id}','${n.id}','${escHtml(n.content)}')" class="w-6 h-6 rounded flex items-center justify-center text-muted hover:text-accent text-xs"><i class="fa-solid fa-pen"></i></button>
-              <button onclick="deleteNote('${t.id}','${n.id}');refreshDetail('${t.id}')" class="w-6 h-6 rounded flex items-center justify-center text-muted hover:text-danger text-xs"><i class="fa-solid fa-trash"></i></button>
-            </div>
-          </div>
-          <p class="text-xs text-muted mt-1">${fmtDate(n.createdAt)} ${fmtTime(n.createdAt)}</p>
-        </div>`).join(''):'<p class="text-muted text-sm text-center py-3">No notes</p>'}
+        ${t.notes.length?t.notes.map(n=>`<div class="bg-surface/50 rounded-lg px-3 py-2.5 group"><div class="flex items-start justify-between gap-2"><p class="text-sm flex-1 whitespace-pre-wrap">${escHtml(n.content)}</p><div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"><button onclick="showEditNoteModal('${t.id}','${n.id}','${escHtml(n.content)}')" class="w-6 h-6 rounded flex items-center justify-center text-muted hover:text-accent text-xs"><i class="fa-solid fa-pen"></i></button><button onclick="deleteNote('${t.id}','${n.id}');refreshDetail('${t.id}')" class="w-6 h-6 rounded flex items-center justify-center text-muted hover:text-danger text-xs"><i class="fa-solid fa-trash"></i></button></div></div><p class="text-xs text-muted mt-1">${fmtDate(n.createdAt)} ${fmtTime(n.createdAt)}</p></div>`).join(''):'<p class="text-muted text-sm text-center py-3">No notes yet</p>'}
       </div>
-      <div class="flex gap-2">
-        <textarea id="new-note-input" placeholder="Add a note..." class="flex-1 bg-surface border border-bord rounded-lg px-3 py-2 text-sm text-fg resize-none" rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();addNoteFromInput('${t.id}')}"></textarea>
-        <button onclick="addNoteFromInput('${t.id}')" class="px-3 py-2 bg-accent/10 text-accent rounded-lg text-sm hover:bg-accent/20 transition-all self-end"><i class="fa-solid fa-plus"></i></button>
-      </div>
+      <div class="flex gap-2"><textarea id="new-note-input" placeholder="Add a note..." class="flex-1 bg-surface border border-bord rounded-lg px-3 py-2 text-sm text-fg resize-none" rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();addNoteFromInput('${t.id}')}"></textarea><button onclick="addNoteFromInput('${t.id}')" class="px-3 py-2 bg-accent/10 text-accent rounded-lg text-sm hover:bg-accent/20 transition-all self-end"><i class="fa-solid fa-plus"></i></button></div>
     </div>
   </div>`);
 }
 
 function refreshDetail(id){
-  const acc=getAccount();if(!acc)return;
-  const t=acc.tasks.find(x=>x.id===id);if(!t){hideModal();renderView();return}
+  const acc=getAccount();if(!acc)return;const t=acc.tasks.find(x=>x.id===id);if(!t){hideModal();renderView();return}
   renderTaskDetail(t);
 }
 
-function addSubtaskFromInput(taskId){
-  const inp=document.getElementById('new-subtask-input');
-  const v=inp.value.trim();if(!v)return;
-  addSubtask(taskId,v);refreshDetail(taskId);
-}
-
-function addNoteFromInput(taskId){
-  const inp=document.getElementById('new-note-input');
-  const v=inp.value.trim();if(!v)return;
-  addNote(taskId,v);refreshDetail(taskId);
-}
+function addSubtaskFromInput(taskId){const inp=document.getElementById('new-subtask-input');const v=inp.value.trim();if(!v)return;addSubtask(taskId,v);refreshDetail(taskId)}
+function addNoteFromInput(taskId){const inp=document.getElementById('new-note-input');const v=inp.value.trim();if(!v)return;addNote(taskId,v);refreshDetail(taskId)}
 
 /* Edit Task */
 function showEditTaskModal(id){
-  const acc=getAccount();if(!acc)return;
-  const t=acc.tasks.find(x=>x.id===id);if(!t)return;
-  showModal(`
-  <div class="p-6">
-    <h3 class="font-display font-semibold text-lg mb-5">Edit Task</h3>
-    <div class="space-y-4">
-      <div><label class="block text-sm text-muted mb-1">Title</label><input id="et-title" type="text" value="${escHtml(t.title)}" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"></div>
-      <div><label class="block text-sm text-muted mb-1">Description</label><textarea id="et-desc" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm resize-none" rows="3">${escHtml(t.description)}</textarea></div>
-      <div class="grid grid-cols-2 gap-4">
-        <div><label class="block text-sm text-muted mb-1">Priority</label><select id="et-priority" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"><option value="low" ${t.priority==='low'?'selected':''}>Low</option><option value="medium" ${t.priority==='medium'?'selected':''}>Medium</option><option value="high" ${t.priority==='high'?'selected':''}>High</option><option value="urgent" ${t.priority==='urgent'?'selected':''}>Urgent</option></select></div>
-        <div><label class="block text-sm text-muted mb-1">Status</label><select id="et-status" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"><option value="todo" ${t.status==='todo'?'selected':''}>To Do</option><option value="in-progress" ${t.status==='in-progress'?'selected':''}>In Progress</option><option value="completed" ${t.status==='completed'?'selected':''}>Completed</option></select></div>
-      </div>
-      <div><label class="block text-sm text-muted mb-1">Deadline</label><input id="et-deadline" type="date" value="${t.deadline||''}" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"></div>
-      <div class="flex gap-3 justify-end pt-2">
-        <button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg border border-bord text-muted hover:text-fg transition-all">Cancel</button>
-        <button onclick="submitEditTask('${t.id}')" class="px-4 py-2 text-sm rounded-lg bg-accent text-bg hover:bg-accenth font-semibold transition-all">Save</button>
-      </div>
-    </div>
-  </div>`);
+  const acc=getAccount();if(!acc)return;const t=acc.tasks.find(x=>x.id===id);if(!t)return;
+  showModal(`<div class="p-6"><h3 class="font-display font-semibold text-lg mb-5">Edit Task</h3><div class="space-y-4"><div><label class="block text-sm text-muted mb-1">Title</label><input id="et-title" type="text" value="${escHtml(t.title)}" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"></div><div><label class="block text-sm text-muted mb-1">Description</label><textarea id="et-desc" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm resize-none" rows="3">${escHtml(t.description)}</textarea></div><div class="grid grid-cols-2 gap-4"><div><label class="block text-sm text-muted mb-1">Priority</label><select id="et-priority" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"><option value="low" ${t.priority==='low'?'selected':''}>Low</option><option value="medium" ${t.priority==='medium'?'selected':''}>Medium</option><option value="high" ${t.priority==='high'?'selected':''}>High</option><option value="urgent" ${t.priority==='urgent'?'selected':''}>Urgent</option></select></div><div><label class="block text-sm text-muted mb-1">Status</label><select id="et-status" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"><option value="todo" ${t.status==='todo'?'selected':''}>To Do</option><option value="in-progress" ${t.status==='in-progress'?'selected':''}>In Progress</option><option value="completed" ${t.status==='completed'?'selected':''}>Completed</option></select></div></div><div><label class="block text-sm text-muted mb-1">Deadline</label><input id="et-deadline" type="date" value="${t.deadline||''}" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"></div><div class="flex gap-3 justify-end pt-2"><button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg border border-bord text-muted hover:text-fg transition-all">Cancel</button><button onclick="submitEditTask('${t.id}')" class="px-4 py-2 text-sm rounded-lg bg-accent text-bg hover:bg-accenth font-semibold transition-all">Save</button></div></div></div>`);
 }
 
 function submitEditTask(id){
-  const title=document.getElementById('et-title').value.trim();
-  if(!title)return showToast('Title is required','error');
+  const title=document.getElementById('et-title').value.trim();if(!title)return showToast('Title is required','error');
   updateTask(id,{title,description:document.getElementById('et-desc').value.trim(),priority:document.getElementById('et-priority').value,status:document.getElementById('et-status').value,deadline:document.getElementById('et-deadline').value||null});
   hideModal();showToast('Task updated','success');refreshDetail(id);
 }
 
-/* Delete Task */
 function confirmDeleteTask(id){
-  showModal(`
-  <div class="p-6">
-    <div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-full bg-danger/20 flex items-center justify-center"><i class="fa-solid fa-trash text-danger"></i></div><h3 class="font-display font-semibold text-lg">Delete Task</h3></div>
-    <p class="text-muted text-sm mb-6">Are you sure you want to delete this task? You can restore it from History.</p>
-    <div class="flex gap-3 justify-end">
-      <button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg border border-bord text-muted hover:text-fg transition-all">Cancel</button>
-      <button onclick="doDeleteTask('${id}')" class="px-4 py-2 text-sm rounded-lg bg-danger text-white hover:bg-red-600 transition-all">Delete</button>
-    </div>
-  </div>`);
+  showModal(`<div class="p-6"><div class="flex items-center gap-3 mb-4"><div class="w-10 h-10 rounded-full bg-danger/20 flex items-center justify-center"><i class="fa-solid fa-trash text-danger"></i></div><h3 class="font-display font-semibold text-lg">Delete Task</h3></div><p class="text-muted text-sm mb-6">Are you sure you want to delete this task? You can restore it from History.</p><div class="flex gap-3 justify-end"><button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg border border-bord text-muted hover:text-fg transition-all">Cancel</button><button onclick="doDeleteTask('${id}')" class="px-4 py-2 text-sm rounded-lg bg-danger text-white hover:bg-red-600 transition-all">Delete</button></div></div>`);
 }
 
 function doDeleteTask(id){deleteTask(id);hideModal();showToast('Task deleted','error');renderView()}
 
 /* Edit Subtask */
 function showEditSubtaskModal(taskId,subId,currentTitle){
-  showModal(`
-  <div class="p-6">
-    <h3 class="font-display font-semibold text-lg mb-5">Edit Subtask</h3>
-    <div class="space-y-4">
-      <div><label class="block text-sm text-muted mb-1">Title</label><input id="es-title" type="text" value="${escHtml(currentTitle)}" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm"></div>
-      <div class="flex gap-3 justify-end">
-        <button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg border border-bord text-muted hover:text-fg transition-all">Cancel</button>
-        <button onclick="submitEditSubtask('${taskId}','${subId}')" class="px-4 py-2 text-sm rounded-lg bg-accent text-bg hover:bg-accenth font-semibold transition-all">Save</button>
-      </div>
-    </div>
-  </div>`);
+  showModal(`<div class="p-6"><h3 class="font-display font-semibold text-lg mb-5">Edit Subtask</h3><div class="space-y-4"><div><label class="block text-sm text-muted mb-1">Title</label><input id="es-title" type="text" value="${escHtml(currentTitle)}" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm" onkeydown="if(event.key==='Enter')submitEditSubtask('${taskId}','${subId}')"></div><div class="flex gap-3 justify-end"><button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg border border-bord text-muted hover:text-fg transition-all">Cancel</button><button onclick="submitEditSubtask('${taskId}','${subId}')" class="px-4 py-2 text-sm rounded-lg bg-accent text-bg hover:bg-accenth font-semibold transition-all">Save</button></div></div></div>`);
   setTimeout(()=>document.getElementById('es-title')?.focus(),100);
 }
 
-function submitEditSubtask(taskId,subId){
-  const v=document.getElementById('es-title').value.trim();if(!v)return showToast('Title required','error');
-  editSubtask(taskId,subId,v);hideModal();refreshDetail(taskId);
-}
+function submitEditSubtask(taskId,subId){const v=document.getElementById('es-title').value.trim();if(!v)return showToast('Title required','error');editSubtask(taskId,subId,v);hideModal();refreshDetail(taskId)}
 
 /* Edit Note */
 function showEditNoteModal(taskId,noteId,currentContent){
-  showModal(`
-  <div class="p-6">
-    <h3 class="font-display font-semibold text-lg mb-5">Edit Note</h3>
-    <div class="space-y-4">
-      <div><label class="block text-sm text-muted mb-1">Content</label><textarea id="en-content" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm resize-none" rows="4">${escHtml(currentContent)}</textarea></div>
-      <div class="flex gap-3 justify-end">
-        <button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg border border-bord text-muted hover:text-fg transition-all">Cancel</button>
-        <button onclick="submitEditNote('${taskId}','${noteId}')" class="px-4 py-2 text-sm rounded-lg bg-accent text-bg hover:bg-accenth font-semibold transition-all">Save</button>
-      </div>
-    </div>
-  </div>`);
+  showModal(`<div class="p-6"><h3 class="font-display font-semibold text-lg mb-5">Edit Note</h3><div class="space-y-4"><div><label class="block text-sm text-muted mb-1">Content</label><textarea id="en-content" class="w-full bg-surface border border-bord rounded-lg px-4 py-2.5 text-fg text-sm resize-none" rows="4">${escHtml(currentContent)}</textarea></div><div class="flex gap-3 justify-end"><button onclick="hideModal()" class="px-4 py-2 text-sm rounded-lg border border-bord text-muted hover:text-fg transition-all">Cancel</button><button onclick="submitEditNote('${taskId}','${noteId}')" class="px-4 py-2 text-sm rounded-lg bg-accent text-bg hover:bg-accenth font-semibold transition-all">Save</button></div></div></div>`);
   setTimeout(()=>document.getElementById('en-content')?.focus(),100);
 }
 
-function submitEditNote(taskId,noteId){
-  const v=document.getElementById('en-content').value.trim();if(!v)return showToast('Content required','error');
-  editNote(taskId,noteId,v);hideModal();refreshDetail(taskId);
-}
+function submitEditNote(taskId,noteId){const v=document.getElementById('en-content').value.trim();if(!v)return showToast('Content required','error');editNote(taskId,noteId,v);hideModal();refreshDetail(taskId)}
 
 /* ============================================================
    TOAST
@@ -799,33 +690,23 @@ function submitEditNote(taskId,noteId){
 function showToast(msg,type='info'){
   const colors={success:'border-success/40 bg-success/10 text-success',error:'border-danger/40 bg-danger/10 text-danger',info:'border-info/40 bg-info/10 text-info',warn:'border-warn/40 bg-warn/10 text-warn'};
   const icons={success:'fa-circle-check',error:'fa-circle-xmark',info:'fa-circle-info',warn:'fa-triangle-exclamation'};
-  const tc=document.getElementById('toast-container');
-  const t=document.createElement('div');
+  const tc=document.getElementById('toast-container');const t=document.createElement('div');
   t.className=`pointer-events-auto border rounded-xl px-4 py-3 text-sm flex items-center gap-2 shadow-lg anim-slider ${colors[type]||colors.info}`;
   t.innerHTML=`<i class="fa-solid ${icons[type]||icons.info}"></i><span>${escHtml(msg)}</span>`;
-  tc.appendChild(t);
-  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(20px)';t.style.transition='all .3s';setTimeout(()=>t.remove(),300)},3000);
+  tc.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(20px)';t.style.transition='all .3s';setTimeout(()=>t.remove(),300)},3000);
 }
 
 /* ============================================================
-   KEYBOARD
+   KEYBOARD & INIT
    ============================================================ */
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')hideModal();
-});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')hideModal()});
 
-/* ============================================================
-   INIT
-   ============================================================ */
 function init(){
   const d=loadAll();
-  // Auto-login from remembered
   if(d.remembered&&d.accounts[d.remembered.username]&&d.accounts[d.remembered.username].password===d.remembered.password){
     d.currentSession=d.remembered.username;saveAll(d);enterApp();return;
   }
-  // Show auth
-  document.getElementById('auth-screen').classList.remove('hidden');
-  document.getElementById('app-screen').classList.add('hidden');
+  document.getElementById('auth-screen').classList.remove('hidden');document.getElementById('app-screen').classList.add('hidden');
 }
 
 init();
