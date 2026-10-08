@@ -1,0 +1,221 @@
+/* ============================================================
+   DoList About Page — Stylesheet
+   Edit visuals here. Edit content in about.html
+   ============================================================ */
+
+/* --- Base --- */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#0a0c12;color:#eef0f6}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#12151e}
+::-webkit-scrollbar-thumb{background:#2a2f42;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#3a3f52}
+
+/* --- Animations --- */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(22px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes floatY{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-10px)}
+}
+@keyframes floatY2{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
+}
+@keyframes progressGrow{
+  from{width:0}
+  to{width:var(--pw)}
+}
+@keyframes slideIn{
+  from{opacity:0;transform:translateX(-12px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@keyframes checkPop{
+  0%{transform:scale(0)}
+  60%{transform:scale(1.2)}
+  100%{transform:scale(1)}
+}
+
+/* --- Animation Classes --- */
+.anim{animation:fadeUp .6s ease both}
+.d1{animation-delay:.08s}
+.d2{animation-delay:.16s}
+.d3{animation-delay:.24s}
+.d4{animation-delay:.32s}
+.d5{animation-delay:.4s}
+.d6{animation-delay:.48s}
+
+/* --- Mockup Task Slide-in Delays --- */
+.mock-task{animation:slideIn .5s ease both}
+.mt1{animation-delay:.6s}
+.mt2{animation-delay:.8s}
+.mt3{animation-delay:1s}
+.mt4{animation-delay:1.2s}
+.mt5{animation-delay:1.4s}
+
+/* --- Mockup Animated Elements --- */
+.mock-progress{animation:progressGrow .8s ease both;animation-delay:1.6s}
+.mock-check{animation:checkPop .3s ease both;animation-delay:1.8s}
+
+/* --- Float Classes --- */
+.float-a{animation:floatY 5s ease-in-out infinite}
+.float-b{animation:floatY2 6s ease-in-out infinite -2s}
+.float-c{animation:floatY 7s ease-in-out infinite -4s}
+
+/* --- Layout --- */
+.page-nav{
+  width:100%;max-width:1320px;margin:0 auto;
+  padding:20px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.page-main{
+  flex:1;padding:0 24px 64px;
+  max-width:1320px;margin:0 auto;width:100%;
+  display:flex;align-items:flex-start;
+}
+.two-col{display:flex;gap:64px;width:100%;align-items:flex-start}
+.text-col{flex:1;min-width:0;padding-top:16px}
+.visual-col{width:100%;max-width:480px;flex-shrink:0;padding-top:16px}
+
+@media(min-width:1024px){
+  .two-col{gap:80px}
+  .visual-col{width:480px}
+}
+@media(max-width:1023px){
+  .two-col{flex-direction:column}
+  .visual-col{max-width:480px;margin:0 auto}
+}
+
+/* --- Nav --- */
+.nav-logo{
+  display:flex;align-items:center;gap:10px;
+  text-decoration:none;color:#eef0f6;
+}
+.nav-logo:hover .nav-logo-icon{transform:scale(1.1)}
+.nav-logo-icon{color:#e8a838;font-size:20px;transition:transform .2s}
+.nav-logo-text{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.02em}
+.nav-back{
+  font-size:14px;color:#6b7088;text-decoration:none;
+  display:flex;align-items:center;gap:8px;transition:color .2s;
+}
+.nav-back:hover{color:#e8a838}
+
+/* --- Content Typography --- */
+.section-label{
+  display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;
+}
+.section-dot{width:8px;height:8px;border-radius:50%;background:#e8a838}
+.section-label-text{
+  font-size:12px;font-weight:500;color:#e8a838;
+  text-transform:uppercase;letter-spacing:.1em;
+}
+.page-title{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(2.25rem,5vw,3rem);
+  font-weight:700;line-height:1.15;
+}
+.body-text{
+  font-size:clamp(1rem,2vw,1.125rem);
+  line-height:1.75;color:#6b7088;
+}
+.callout{
+  margin:40px 0;border-left:2px solid #e8a838;
+  padding:8px 0 8px 24px;
+}
+.callout-text{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(1.125rem,2.5vw,1.25rem);
+  font-weight:600;line-height:1.4;color:#eef0f6;
+}
+.footer-line{
+  margin-top:56px;padding-top:32px;
+  border-top:1px solid #2a2f42;
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;
+  font-size:12px;color:#6b7088;
+}
+.footer-link{
+  color:#e8a838;text-decoration:none;
+  display:flex;align-items:center;gap:6px;transition:color .2s;
+}
+.footer-link:hover{color:#d49530}
+
+/* --- Mockup Frame --- */
+.mockup-frame{
+  background:#12151e;border:1px solid #2a2f42;border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 25px 60px rgba(0,0,0,.4),0 0 0 1px rgba(42,47,66,.3);
+}
+.mockup-bar{
+  background:#0a0c12;padding:10px 14px;
+  display:flex;align-items:center;gap:6px;
+  border-bottom:1px solid #2a2f42;
+}
+.mockup-dot{width:8px;height:8px;border-radius:50%}
+.mockup-body{padding:16px;background:#0e1018}
+.mockup-body>*>+*{margin-top:12px}
+
+/* Mockup Header */
+.mock-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.mock-header-title{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600}
+.mock-header-btn{
+  font-size:10px;padding:2px 8px;border-radius:9999px;
+  background:rgba(232,168,56,.15);color:#e8a838;font-weight:500;
+}
+
+/* Mockup Task Card */
+.mock-task{
+  background:#1a1e2c;border:1px solid #2a2f42;border-radius:12px;
+  padding:12px;display:flex;align-items:flex-start;gap:12px;
+}
+.mock-task-check{
+  width:20px;height:20px;border-radius:50%;border:2px solid #2a2f42;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+}
+.mock-task-check.done{border-color:#34d399;background:rgba(52,211,153,.2)}
+.mock-task-check.overdue{border-color:#2a2f42}
+.mock-task-info{flex:1;min-width:0}
+.mock-task-title{font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mock-task-title.completed{text-decoration:line-through;color:#6b7088}
+.mock-task-badges{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap}
+.mock-badge{font-size:9px;padding:2px 6px;border-radius:9999px;font-weight:500}
+.mock-progress-bar{margin-top:8px;height:4px;background:#12151e;border-radius:9999px;overflow:hidden}
+.mock-progress-fill{height:100%;border-radius:9999px}
+.mock-progress-meta{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.mock-progress-label{font-size:9px;color:#6b7088}
+.mock-progress-pct{font-size:9px;color:#e8a838;font-weight:500}
+.mock-deadline{margin-top:6px;display:flex;align-items:center;gap:4px;font-size:9px;color:#f87171}
+
+/* Mockup Priority Borders */
+.border-p-low{border-left:3px solid #34d399}
+.border-p-medium{border-left:3px solid #e8a838}
+.border-p-high{border-left:3px solid #fb923c}
+.border-p-urgent{border-left:3px solid #f87171}
+
+/* --- Decorative Blobs --- */
+.deco-blob{position:fixed;border-radius:50%;filter:blur(110px);opacity:.18;pointer-events:none;z-index:0}
+.float-blob{position:absolute;border-radius:50%;pointer-events:none}
+
+/* --- Stat Pills --- */
+.stat-pills{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:24px}
+.stat-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(26,30,44,.6);border:1px solid #2a2f42;
+  border-radius:9999px;padding:6px 12px;font-size:10px;color:#6b7088;
+}
+
+/* --- Badge Color Presets --- */
+.badge-todo{background:rgba(96,165,250,.12);color:#60a5fa}
+.badge-inprogress{background:rgba(232,168,56,.12);color:#e8a838}
+.badge-completed{background:rgba(52,211,153,.15);color:#34d399}
+.badge-low{background:rgba(52,211,153,.12);color:#34d399}
+.badge-medium{background:rgba(232,168,56,.12);color:#e8a838}
+.badge-high{background:rgba(251,146,60,.12);color:#fb923c}
+.badge-urgent{background:rgba(248,113,113,.12);color:#f87171}
+
+/* --- Progress Gradient --- */
+.grad-warm{background:linear-gradient(90deg,#e8a838,#34d399)}
